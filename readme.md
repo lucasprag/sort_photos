@@ -1,17 +1,26 @@
-# sort photos
+# Sort photos
 
-A script to sort photos by year and month into directories.
+A script to sort photos & videos by year and month into directories.
+
+![Example of directories](/dir_example.png)
 
 
 ## Dependencies
 
-For `exif`, follow [their instructions](https://github.com/tonytonyjan/exif). Quick copy/paste:
+For photos, I'm using [exif](https://rubygems.org/gems/exif) which depends on `libexif` on Mac. Follow [their setup instructions](https://github.com/tonytonyjan/exif), but in a nutshell:
 
 ```
 $ brew install libexif
 ```
 
-Then install ruby dependencies:
+For videos, I'm using [streamio-ffmpeg](https://rubygems.org/gems/streamio-ffmpeg) which depends on `ffmpeg` on Mac. Follow [their setup instructions](https://github.com/streamio/streamio-ffmpeg?tab=readme-ov-file#ffmpeg), but basically:
+
+```
+$ brew install ffmpeg
+```
+
+
+Finally, install ruby dependencies:
 
 ```
 $ bundle install
@@ -29,22 +38,22 @@ $ ./bin/sort_photos copy path/to/source/dir path/to/destination/dir
 
 ```
 ├── 2022
-│   ├── 10\ oct
-│   ├── 11\ nov
-│   └── 12\ dec
+│   ├── 10-Oct
+│   ├── 11-Nov
+│   └── 12-Dec
 └── 2023
-    ├── 1\ jan
-    ├── 10\ oct
-    ├── 11\ nov
-    ├── 12\ dec
-    ├── 2\ feb
-    ├── 3\ mar
-    ├── 4\ apr
-    ├── 5\ may
-    ├── 6\ jun
-    ├── 7\ jul
-    ├── 8\ ago
-    └── 9\ sept
+    ├── 1-Jan
+    ├── 2-Feb
+    ├── 3-Mar
+    ├── 4-Apr
+    ├── 5-May
+    ├── 6-Jun
+    ├── 7-Jul
+    ├── 8-Ago
+    ├── 9-Sept
+    ├── 10-Oct
+    ├── 11-Nov
+    └── 12-Dec
 
 ```
 
