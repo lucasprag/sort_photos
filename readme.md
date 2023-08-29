@@ -20,7 +20,7 @@ $ bundle install
 ## Run
 
 ```
-$ ./sort_photos /absolute/path/to/source/*.jpg /absolute/path/to/destination/dir/
+$ ./bin/sort_photos copy path/to/source/dir path/to/destination/dir
 ```
 
 ## Behaviour

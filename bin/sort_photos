@@ -1,0 +1,94 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "exif"
+require "thor"
+require "fileutils"
+require "date"
+require "streamio-ffmpeg"
+require "pry"
+
+SUPPORTED_IMAGE_EXTENSIONS = %w[jpg jpeg png]
+SUPPORTED_VIDEO_EXTENSIONS = %w[mp4 mov]
+
+class SortPhotos < Thor
+  desc "copy", "Sort photos based on year & month copying them using the time they were taken as name"
+  def copy(source, destination)
+    index = 0
+
+    Dir["#{source}/**/**/*"].each do |file|
+      puts "> Trying #{file}"
+      creation_time = try_getting_creation_time(file)
+
+      target = if creation_time
+        find_target(file, creation_time, destination)
+      else
+        files_without_metadata_dir(destination)
+      end
+
+      begin
+        FileUtils.copy(file, target)
+      rescue => e
+        puts ">>>>>>>>> Failed to copy file #{file} 🔴"
+        File.write("copy_failed_files.txt", file, mode: "a")
+        next
+      end
+
+      index += 1
+      puts "> #{index} Copied #{target} 🟢"
+    end
+  end
+
+  private
+
+  def find_target(image, creation_time, destination)
+    target_dir = "#{destination}/#{creation_time.strftime("%Y/%-m-%b")}"
+    FileUtils.mkdir_p(target_dir) unless File.directory?(target_dir)
+
+    filename = creation_time.strftime("%Y-%m-%d %Hh%Mm%Ss")
+    extname = File.extname(image)
+
+    target = "#{target_dir}/photo #{filename}#{extname}"
+
+    index = 0
+
+    while File.exist?(target)
+      index += 1
+      target = "#{target_dir}/photo #{filename}_#{index}#{extname}"
+    end
+
+    target
+  end
+
+  def try_getting_creation_time(file)
+    extname = File.extname(file).tr(".", "").downcase
+
+    if SUPPORTED_IMAGE_EXTENSIONS.include?(extname)
+      metadata = Exif::Data.new(File.open(file))
+      taken_at(metadata.date_time_original)
+    elsif SUPPORTED_VIDEO_EXTENSIONS.include?(extname)
+      FFMPEG::Movie.new(file).creation_time
+    else
+      puts ">>>>>>>>> Unsupported file extension #{file} 🔴"
+    end
+  rescue => _
+    puts "> Couldn't get metadata for #{file} 🟡"
+    nil
+  end
+
+  def taken_at(date_time_original)
+    date_parts = date_time_original.split(" ")
+    datetime_string = "#{date_parts[0].tr(":", "-")} #{date_parts[1]}"
+    DateTime.parse(datetime_string)
+  end
+
+  def files_without_metadata_dir(destination)
+    dir = "#{destination}/files_without_metadata"
+    FileUtils.mkdir_p(dir) unless File.directory?(dir)
+    dir
+  end
+end
+
+SortPhotos.start
+
+# ./bin/sort_photos copy ./source ./result
